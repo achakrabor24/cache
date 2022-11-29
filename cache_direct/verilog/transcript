@@ -1,0 +1,26 @@
+# vsim "+addr_trace_file_name=mem.addr" -c mem_system_perfbench -lib __work -voptargs="+acc" -wlf dump.wlf -do "log -howmany -rec /* ; run -all" 
+# Start time: 17:59:12 on Nov 28,2022
+# ** Warning: License feature 'msimpevsimvlog' will expire in 7 days.
+# Loading __work.mem_system_perfbench
+# Loading __work.mem_system_hier
+# Loading __work.clkrst
+# Loading __work.mem_system
+# Loading __work.cache
+# Loading __work.memc
+# Loading __work.memv
+# Loading __work.four_bank_mem
+# Loading __work.final_memory
+# Loading __work.dff
+# Loading __work.cache_controller
+# Loading __work.mem_system_ref
+# log -howmany -rec /* 
+# 1484
+#  run -all
+# Using trace file                                                                                                                                                                                                                                                         mem.addr
+# Error signal asserted
+# ** Note: $stop    : clkrst.v(35)
+#    Time: 100 ns  Iteration: 0  Instance: /mem_system_perfbench/DUT/clkgen
+# Break in Module clkrst at clkrst.v line 35
+# Stopped at clkrst.v line 35
+# Store Miss for Address 348 in way 0
+# Load Hit for Address 348 in way 0
