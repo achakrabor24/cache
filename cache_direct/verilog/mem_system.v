@@ -28,26 +28,22 @@ module mem_system(/*AUTOARG*/
     parameter memtype = 0;
 
 
-    wire hit, dirty, valid;
-    wire [4:0] tag_out;
-    wire [15:0] data_out, data_out_m, addr_mem;
-    wire err_c, err_m, errCtrl;
-
-    wire write_c, valid_in, ch, comp, done, enable, stall;
-    wire wr_m, rd_m;
-    wire [4:0] tag_in, tag_m;
+    // Internal signals
+    wire write_cache, valid_in, ch, comp, done, enable, stall, stall_mem, write_mem, read_mem, errCache, errMem, errCtrl, hit, dirty, valid;
+    wire [4:0] tag_out, tag_in, tag_mem;
     wire [7:0] index;
-    wire [2:0] offset, offset_m;
-    wire [15:0] data_in, data_in_m;
+    wire [2:0] offset, offset_mem;
+    wire [15:0] data_in, data_in_mem, data_from_cache, data_out_mem, addr_mem;
+    wire [3:0] busy_mem;
 
 
     cache #(0 + memtype) c0(// Outputs
                           .tag_out              (tag_out),
-                          .data_out             (data_out),
+                          .data_out             (data_from_cache),
                           .hit                  (hit),
                           .dirty                (dirty),
                           .valid                (valid),
-                          .err                  (err_c),
+                          .err                  (errCache),
                           // Inputs
                           .enable               (enable),
                           .clk                  (clk),
@@ -58,46 +54,43 @@ module mem_system(/*AUTOARG*/
                           .offset               (offset),
                           .data_in              (data_in),
                           .comp                 (comp),
-                          .write                (write_c),
+                          .write                (write_cache),
                           .valid_in             (valid_in));
 
-    wire stall_m;
-    wire [3:0] busy_mem;
 
-    four_bank_mem mem(// Outputs
-                     .data_out          (data_out_m),
-                     .stall             (stall_m),
+    four_bank_mem fb0(// Outputs
+                     .data_out          (data_out_mem),
+                     .stall             (stall_mem),
                      .busy              (busy_mem),
-                     .err               (err_m),
+                     .err               (errMem),
                      // Inputs
                      .clk               (clk),
                      .rst               (rst),
                      .createdump        (createdump),
                      .addr              (addr_mem),
-                     .data_in           (data_in_m),
-                     .wr                (wr_m),
-                     .rd                (rd_m));
+                     .data_in           (data_in_mem),
+                     .wr                (write_mem),
+                     .rd                (read_mem));
 
 
-    // your code here
 
-assign addr_mem = {tag_m, index, offset_m};
+assign addr_mem = {tag_mem, index, offset_mem};
 
 cache_controller cc(
 // Outputs
-.comp(comp), .valid_in(valid_in), .ch(CacheHit), .done(Done), .wr_m(wr_m), .rd_m(rd_m), .errCtrl(errCtrl), 
-.write_c(write_c), .enable(enable), .index(index), .offset(offset), .tag_in(tag_in), 
-.stall(stall), .data_in_m(data_in_m), .tag_m(tag_m), .offset_m(offset_m), .data_in(data_in),
+.comp(comp), .valid_in(valid_in), .cache_hit(CacheHit), .done(Done), .wr_m(write_mem), .rd_m(read_mem), .errCtrl(errCtrl), 
+.write_c(write_cache), .enable(enable), .index(index), .offset(offset), .tag_in(tag_in), 
+.stall(stall), .data_in_m(data_in_mem), .tag_m(tag_mem), .offset_m(offset_mem), .data_in(data_in),
 
 // Inputs
-.addr(Addr), .data_out(data_out), .data_input(DataIn), .hit(hit), .valid(valid), .dirty(dirty), .Rd(Rd), .Wr(Wr), .tag_out(tag_out), 
-.data_out_m(data_out_m));
+.addr(Addr), .data_out(data_from_cache), .data_input(DataIn), .hit(hit), .valid(valid), .dirty(dirty), .Rd(Rd), .Wr(Wr), .tag_out(tag_out), 
+.data_out_m(data_out_mem));
 
-assign err = err_m | err_c | errCtrl;
+assign err = errMem | errCache | errCtrl;
 
-assign DataOut = data_out;
+assign DataOut = data_from_cache;
 
-// How to with reg type
+// How to with output wire type and in this module reg type
 always @* begin
   Stall = stall;
 end
