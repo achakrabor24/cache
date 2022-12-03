@@ -90,10 +90,18 @@ assign err = errMem | errCache | errCtrl;
 
 assign DataOut = data_from_cache;
 
-// How to with output wire type and in this module reg type
+wire [5:0] state;
+reg [5:0] next_state;
+
+dff dff0[5:0](.q(state), .d(next_state), .clk(clk), .rst(rst));
+
+// How to with output wire type and in this module reg type (and to pass vcheck)
 always @* begin
-  Stall = stall;
+	case(state) 
+		default: Stall = stall;
+	endcase
 end
+
 
 
 endmodule // mem_system
